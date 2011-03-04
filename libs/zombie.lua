@@ -1,8 +1,12 @@
 require "libs/middleclass"
+require "libs/vector"
 require "libs/anim"
 
-Player = class("Player")
-function Player:initialize(posx,posy)
+Zombie = class("Zombie")
+function Zombie:initialize(posx,posy)
+	--[[self.quadImage = love.graphics.newImage('images/cityspritesheet20lj.png')
+	self.setH = self.quad_image:getHeight()
+	self.setW = self.quad_image:getWidth()]]
 	self.quadInfo = {
 		{'down_standing',480,387,15,19},
 		{'down_1',496,387,15,19},
@@ -24,53 +28,51 @@ function Player:initialize(posx,posy)
 	self.anim = Anim:new()
 	self.w = 15
 	self.h = 19
-  	self.angle = 0
+  	self.angle = math.random()*(2*math.pi)
+  	self:vectors()
   	self.body = love.physics.newBody( World, posx, posy, 50, 0 )
   	self.shape = love.physics.newRectangleShape( self.body, 0, 0, self.w, self.h, 0 )
   	self.body:setLinearDamping(10)
-  	self.shape:setData("player")
+  	self.shape:setData("zombie")
   	self.direction = 'up'
   	self.x_, self.y_ = posx, posy
 end
 
-function Player:update(dt)
-	if love.keyboard.isDown("right") or love.keyboard.isDown('d') then --use wasd or arrows to move player
-    	self.body:applyForce(2000, 0)
-    end
-  	if love.keyboard.isDown("left") or love.keyboard.isDown('a') then 
-    	self.body:applyForce(-2000, 0)
-    end
-  	if love.keyboard.isDown("up") or love.keyboard.isDown('w') then 
-    	self.body:applyForce(0, -2000)
-    end
-  	if love.keyboard.isDown("down") or love.keyboard.isDown('s') then 
-    	self.body:applyForce(0, 2000)
-  	end
-  	
-  	local px,py = self.body:getPosition()
+function Zombie:update(dt)
+	local px,py = self.body:getPosition()
   	self.dist = math.sqrt((self.x_-px)^2+(self.y_-py)^2)
-  	self:getAngle(px,py)
-  	self.image = self.anim:getImge(self.direction, self.dist, dt)
-  	self.x_, self.y_ = px,py
+	self.body:applyForce(self.vx*1000, self.vy*1000)
+	self:getAngle()
+	self.image = self.anim:getImge(self.direction, self.dist, dt)
+	self.x_, self.y_ = px,py
 end
 
-function Player:getAngle(px,py) --sets the angle, and sets the quad to draw to appropriate angle of the player
-	local mx,my = camera:mousepos():unpack()
-	local xd = mx-px
-	local yd = my-py
-	self.angle = math.atan2(yd,xd)+math.pi
+function Zombie:getAngle() --sets the angle, and sets the quad to draw to appropriate angle of the player
 	if self.angle < math.pi/4 or self.angle >=7* math.pi/4 then
-		self.direction = 'left' --self.direction is a name of a quad
+		self.direction = 'right' --self.direction is a name of a quad
 	elseif self.angle < 3*math.pi/4 and self.angle >= math.pi/4 then
-		self.direction = 'up'
-	elseif self.angle < 7*math.pi/6 and self.angle >= 3*math.pi/4 then
-		self.direction = 'right'
-	elseif self.angle < 7*math.pi/4 and self.angle >= 7*math.pi/6 then
 		self.direction = 'down'
+	elseif self.angle < 7*math.pi/6 and self.angle >= 3*math.pi/4 then
+		self.direction = 'left'
+	elseif self.angle < 7*math.pi/4 and self.angle >= 7*math.pi/6 then
+		self.direction = 'up'
 	end
 end
 
-function Player:draw()
+
+function Zombie:draw()
 	local _px_, _py_ = self.body:getPosition()
+	love.graphics.setColor( 70, 245, 0, 255 )
 	love.graphics.drawq(quadImage, self.quads[self.image], _px_-self.w/2,_py_-self.h/2)
+	love.graphics.setColor( 255, 255, 255, 255 )
+end
+
+function Zombie:vectors()
+	self.vx =  math.cos(self.angle)/math.pi*2
+	self.vy =  math.sin(self.angle)/math.pi*2
+end
+
+function Zombie:collide()
+	self.angle = math.random()*(2*math.pi)
+  	self:vectors()
 end
