@@ -1,1 +1,9 @@
-This, at some point will hold more information. But you probably won't be able to see it, cause github is being retarded.
+City of Enoch is a work in progress that began as a way to to learn Lua and the play with the framework Love2d. The game is planned to be a sort of sand box survival game set in the post apocalyptic walled in city of Enoch. The city is home to mutants and rivaling gangs fighting over territory.
+
+Proposed Gameplay:
+The player explores the city checking out building and ruins. Supplies are collected and use to construct item used for survival. For example, wood for basic barricades, or cinderblocks to repair and fortify buildings, generators and fuels to run machinery for making components for weapons and building supplies.
+
+Inhabitants:
+Mutants - there are 2 types of mutants living within the walls along side the player, 'live' and 'dead' mutants. The live mutants are pretty cognitive and have some assemblance of intelligence. While the dead mutants act for the most part like zombies; slow, aimless, and prone to form hordes.
+
+....more info here at some point....

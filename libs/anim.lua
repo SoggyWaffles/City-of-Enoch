@@ -15,7 +15,15 @@ function Anim:getImge(direction, dist, dt)
 			self.step = 2
 			self.dt = 0
 		elseif self.dt >= .2 and  self.step == 2 then
+			self.name = direction..'_standing'
+			self.step = 3
+			self.dt = 0
+		elseif self.dt >= .2 and  self.step == 3 then
 			self.name = direction..'_2'
+			self.step = 4
+			self.dt = 0
+		elseif self.dt >= .2 and  self.step == 4 then
+			self.name = direction..'_standing'
 			self.step = 1
 			self.dt = 0
 		else 
