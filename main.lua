@@ -22,6 +22,7 @@ function love.load()
 	mapName_ = 'main'
 	newLevel( mapName )
 	camera = Camera()
+	interiors = {}
 	
 end
 function love.keyreleased( key )
@@ -68,14 +69,14 @@ function love.draw()
 	camera:predraw()
 		map:draw()
 		for n,array in ipairs(map.shapes) do
-			if array:isSensor() == true then
+			--if array:isSensor() == true then
 				local x1,y1, x2,y2, x3,y3, x4,y4 = array:getBoundingBox()
     			local w = x3-x2
     			local h = y2-y1
     			love.graphics.setColor( 255, 0, 0, 255 )
     			love.graphics.rectangle("line",x1,y1,w,h)
     			love.graphics.setColor( 255, 255, 255, 255 )
-    		end
+    		--end
 		end
 		player:draw()
 		zombie:draw()
@@ -95,8 +96,8 @@ function newLevel( mapName )
 	World = love.physics.newWorld(0,0,map.worldW,map.worldH)
 	World:setCallbacks(add, persist, rem, result)
 	map:set()
-	player = Player:new(50,50)
-	zombie = Zombie:new(200,50)
+	player = Player:new(200,400)
+	zombie = Zombie:new(200,200)
 	c_x, c_y =0,0
 	sh_ = love.graphics.getHeight()
 	sw_ = love.graphics.getWidth()
@@ -104,7 +105,8 @@ function newLevel( mapName )
 end
 
 function add(a, b, coll)
-    text = a.." colliding with "..b.." at an angle of "..coll:getNormal().."\n"
+   -- text = a.." colliding with "..b.." at an angle of "..coll:getNormal().."\n"
+    print(a)
     if b == 'zombie' then
     	zombie:collide()
     end

@@ -10,7 +10,8 @@ function Map:initialize( mapName )
 		['building2'] = 'images/building2.png',
 		['building3'] = 'images/building3.png',
 		['building4'] = 'images/map.png',
-		['main'] = 'images/map.png'
+		['main'] = 'images/map.png',
+		['interior'] = 'images/interior1.png'
 		}
 	self.source = love.image.newImageData(self.mapImages[mapName])
 	self.worldW = self.source:getWidth()*self.tileW
@@ -24,6 +25,11 @@ function Map:initialize( mapName )
 		{'building4', 1042,722,64,64},
 		{'wall',465,1750,32,32},
 		{'corner',464,1786,32,32},
+		{'floor', 893,85,32,32},
+		{'drawerR',297,612,15,22},
+		{'couchL', 286,775,15,31},
+		{'bcase',645,804,15,22},
+		{'caseR',773,673,14,48}
 		}
 	self.quads = {}
 	self.quads_info = {}
@@ -37,11 +43,13 @@ end
 
 function Map:set()
 	local color = {}
-	local collidable = {"building1","building2","building3","building4"}
+	local collidable = {"building1","building2","building3","building4","drawerR","couchL", "bcase",
+		"caseR"}
 	self.width = self.worldW/self.tileW --sets the parameters for for loops
 	self.height = self.worldH/self.tileH
 	self.tileTable = {}
 	self:setWalls()
+	local b_ = 0
 	for y=1,self.height do --looks at each pixal in map.png and gets the color, row then column, (y,x)
     	self.tileTable[y] = {} --adds a new array for each row
     	for x=1,self.width do --goes though each pixel in the row
@@ -58,11 +66,32 @@ function Map:set()
       			shape_:setData(k)
       			table.insert(self.bodies, body_)
       			table.insert(self.shapes, shape_)
-      			sensor_ = love.physics.newRectangleShape(body_,(self.tileW),(self.tileH*2+6),32,10,0)
+      			if string.sub(k,1,8) == 'building' then
+      				local sensor_ = love.physics.newRectangleShape(body_,(self.tileW),(self.tileH*2+6),32,10,0)
+      				b_ = b_+1
+      				sensor_:setSensor(true)
+      				sensor_:setData('sensor'..'interior')
+      				table.insert(self.shapes, sensor_)
+      			end
+      		end
+      		if k == 'door' then
+      			local x_b = ((x-1)*self.tileW)
+      			local y_b = ((y-1)*self.tileH)
+      			local body_ = love.physics.newBody(World, x_b, y_b,0,0)
+      			local sensor_ = love.physics.newRectangleShape(body_,(self.tileW/2),(self.tileH/2),32,32,0)
       			sensor_:setSensor(true)
-      			sensor_:setData('sensor'..k)
+      			sensor_:setData('sensor'..'main')
       			table.insert(self.shapes, sensor_)
       		end
+      		if k == 'black' then
+      			local x_b = ((x-1)*self.tileW)
+      			local y_b = ((y-1)*self.tileH)
+      			local body_ = love.physics.newBody(World, x_b, y_b,0,0)
+      			local shape_ = love.physics.newRectangleShape(body_,(self.tileW/2),(self.tileH/2),32,32,0)
+      			shape_:setData(k)
+      			table.insert(self.shapes, shape_)
+      		end
+      			
       		self.tileTable[y][x] = k --set the name of the tile in the correct position in the array
       		color = {} --clears the color array to keep from messing up later on ;)
     	end
@@ -77,7 +106,19 @@ function Map:render()
   			for columnIndex,name in ipairs(row) do
   				local x,y = (columnIndex-1)*self.tileW, (rowIndex-1)*self.tileH
   				if name ~= 'skip' then
-  					love.graphics.drawq(quadImage, self.quads[name], x,y)
+  					if name == 'drawerR' or name=='couchL' or name=='caseR' or name=='bcase' then
+  						print(name)
+  						love.graphics.drawq(quadImage, self.quads['floor'], x,y)
+  						love.graphics.drawq(quadImage, self.quads[name], x,y)
+  					elseif name == 'door' then
+  						love.graphics.drawq(quadImage, self.quads['floor'], x,y)
+  					elseif name == 'black' then
+  						love.graphics.setColor( 0, 0, 0, 255 )
+  						love.graphics.rectangle('fill', x, y, 32, 32 )
+  						love.graphics.setColor( 255, 255, 255, 255 )
+  					else
+  						love.graphics.drawq(quadImage, self.quads[name], x,y)
+  					end
   				end
   			end
   	end
@@ -92,8 +133,15 @@ function Map:checkColors(color)
 		{255,0,255,255,name='building2'},
 		{0,255,255,255,name='building3'},
 		{255,255,0,255,name='building4'},
-		{126,0,0,255,name='corner'}
-	} --list of tiles with {r,g,b,a,name='tile name'} this can be added to at any time
+		{126,0,0,255,255,name='corner'},
+		{114,79,46,255,name='floor'},
+		{255,126,0,255,name='drawerR'},
+		{255,124,124,255,name='couchL'},
+		{73,126,255,255,name='bcase'},
+		{103,136,83,255,name='caseR'},
+		{0,0,0,255,name='black'},
+		{124,124,124,255,name='door'}
+		} --list of tiles with {r,g,b,a,name='tile name'} this can be added to at any time
 	local x = 0 --counter to see if all 4 (r,g,b,a) values match
 	for n,array in ipairs(tiles_) do
 		for i,v in ipairs(array) do
